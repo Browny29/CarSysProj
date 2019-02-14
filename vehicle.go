@@ -49,7 +49,7 @@ func GetVehicles(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	//Check the parameter form the URI
-	licenceplate, ParamExists := DoesQueryParamExist("licenceplate", r)
+	licenceplate, ParamExists := QueryParamExist("licenceplate", r)
 	if !ParamExists {
 		//GET all vehicles
 		var vehicles []Vehicle
@@ -92,11 +92,7 @@ func CreateVehicle(w http.ResponseWriter, r *http.Request) {
 
 	//Convert the vehicle back to json and write it in the response
 	vehicleJson := EncodeJsonObject(output)
-
-	//Write the response
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(vehicleJson)
+	WriteSuccessResponse(w, vehicleJson, "json")
 }
 
 func UpdateVehicle(w http.ResponseWriter, r *http.Request) {
@@ -108,7 +104,7 @@ func UpdateVehicle(w http.ResponseWriter, r *http.Request) {
 
 	defer db.Close()
 	//Check if URI parameter is correct
-	licenceplate, ParamExists := DoesQueryParamExist("licenceplate", r)
+	licenceplate, ParamExists := QueryParamExist("licenceplate", r)
 	if ParamExists {
 		//Update Vehicle
 		var vehicle Vehicle
@@ -126,11 +122,7 @@ func UpdateVehicle(w http.ResponseWriter, r *http.Request) {
 
 			//Convert the vehicle back to json and write it in the response
 			vehicleJson := EncodeJsonObject(output)
-
-			//Write the response
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			w.Write(vehicleJson)
+			WriteSuccessResponse(w, vehicleJson, "json")
 
 		} else {
 			//Give error message back
@@ -153,7 +145,7 @@ func DeleteVehicle(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	//Check the parameter form the URI
-	licenceplate, ParamExists := DoesQueryParamExist("licenceplate", r)
+	licenceplate, ParamExists := QueryParamExist("licenceplate", r)
 	if ParamExists {
 		//Delete Vehicle
 		var vehicle Vehicle
@@ -172,6 +164,17 @@ func DeleteVehicle(w http.ResponseWriter, r *http.Request) {
 		//Fault parameter format
 		w.WriteHeader(http.StatusBadRequest)
 	}
+}
+
+func WriteSuccessResponse(w http.ResponseWriter, body []byte, contentType string) {
+	switch contentType {
+	case "json":
+		w.Header().Set("Content-Type", "application/json")
+	default:
+		panic("Content-type not recognized")
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(body)
 }
 
 func OpenDatabaseConnection(db *gorm.DB) *gorm.DB {
@@ -213,7 +216,7 @@ func VehicleExists(vehicle Vehicle) bool {
 	}
 }
 
-func DoesQueryParamExist(parameter string, r *http.Request) (string, bool) {
+func QueryParamExist(parameter string, r *http.Request) (string, bool) {
 	keys, ok := r.URL.Query()[parameter]
 
 	if !ok || len(keys[0]) < 1 {
