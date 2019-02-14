@@ -28,24 +28,14 @@ type Vehicle struct {
 }
 
 func InitialMigration() {
-	db, err = gorm.Open(databaseType, connectionString)
-	if err != nil {
-		fmt.Println(err.Error())
-		panic("Could not connect to database")
-	}
-
+	OpenDatabaseConnection()
 	defer db.Close()
 
 	db.AutoMigrate(&Vehicle{})
 }
 
 func GetVehicles(w http.ResponseWriter, r *http.Request) {
-	db, err = gorm.Open(databaseType, connectionString)
-	if err != nil {
-		fmt.Println(err.Error())
-		panic("Could not connect to database")
-	}
-
+	OpenDatabaseConnection()
 	defer db.Close()
 
 	//Check the parameter form the URI
@@ -79,12 +69,7 @@ func GetSpecificVehicle(w http.ResponseWriter, licenceplate string) {
 }
 
 func CreateVehicle(w http.ResponseWriter, r *http.Request) {
-	db, err = gorm.Open(databaseType, connectionString)
-	if err != nil {
-		fmt.Println(err.Error())
-		panic("Could not connect to database")
-	}
-
+	OpenDatabaseConnection()
 	defer db.Close()
 
 	var vehicle Vehicle
@@ -101,13 +86,9 @@ func CreateVehicle(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateVehicle(w http.ResponseWriter, r *http.Request) {
-	db, err = gorm.Open(databaseType, connectionString)
-	if err != nil {
-		fmt.Println(err.Error())
-		panic("Could not connect to database")
-	}
-
+	OpenDatabaseConnection()
 	defer db.Close()
+
 	//Check if URI parameter is correct
 	licenceplate, ParamExists := QueryParamExist("licenceplate", r)
 	if ParamExists {
@@ -141,12 +122,7 @@ func UpdateVehicle(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteVehicle(w http.ResponseWriter, r *http.Request) {
-	db, err = gorm.Open(databaseType, connectionString)
-	if err != nil {
-		fmt.Println(err.Error())
-		panic("Could not connect to database")
-	}
-
+	OpenDatabaseConnection()
 	defer db.Close()
 
 	//Check the parameter form the URI
@@ -182,16 +158,12 @@ func WriteSuccessResponse(w http.ResponseWriter, body []byte, contentType string
 	w.Write(body)
 }
 
-func OpenDatabaseConnection(db *gorm.DB) *gorm.DB {
+func OpenDatabaseConnection() {
 	db, err = gorm.Open(databaseType, connectionString)
 	if err != nil {
 		fmt.Println(err.Error())
 		panic("Could not connect to database")
 	}
-
-	defer db.Close()
-
-	return db
 }
 
 func CloseDatabaseConnection(db *gorm.DB) {
