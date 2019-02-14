@@ -51,26 +51,31 @@ func GetVehicles(w http.ResponseWriter, r *http.Request) {
 	//Check the parameter form the URI
 	licenceplate, ParamExists := QueryParamExist("licenceplate", r)
 	if !ParamExists {
-		//GET all vehicles
-		var vehicles []Vehicle
-		db.Find(&vehicles)
-		json.NewEncoder(w).Encode(vehicles)
+		GetAllVehicles(w)
 	} else {
-		//GET specific vehicle
-		var vehicle Vehicle
-		db.Where("licence = ?", licenceplate).Find(&vehicle)
-
-		if VehicleExists(vehicle) {
-			//Show vehicle
-			json.NewEncoder(w).Encode(vehicle)
-		} else {
-			//Give error message back
-			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprintf(w, "Vehicle not found")
-		}
-
+		GetSpecificVehicle(w, licenceplate)
 	}
 
+}
+
+func GetAllVehicles(w http.ResponseWriter) {
+	var vehicles []Vehicle
+	db.Find(&vehicles)
+	json.NewEncoder(w).Encode(vehicles)
+}
+
+func GetSpecificVehicle(w http.ResponseWriter, licenceplate string) {
+	var vehicle Vehicle
+	db.Where("licence = ?", licenceplate).Find(&vehicle)
+
+	if VehicleExists(vehicle) {
+		//Show vehicle
+		json.NewEncoder(w).Encode(vehicle)
+	} else {
+		//Give error message back
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprintf(w, "Vehicle not found")
+	}
 }
 
 func CreateVehicle(w http.ResponseWriter, r *http.Request) {
