@@ -39,7 +39,7 @@ func GetVehicles(w http.ResponseWriter, r *http.Request) {
 	//defer db.Close()
 
 	//Check the parameter form the URI
-	licenceplate, ParamExists := QueryParamExist("licenceplate", r)
+	licenceplate, ParamExists := QueryParamExists("licenceplate", r)
 	if !ParamExists {
 		vehicles := EncodeJsonObject(GetAllVehicles(w))
 		WriteSuccessResponse(w, vehicles, "json")
@@ -87,7 +87,7 @@ func UpdateVehicle(w http.ResponseWriter, r *http.Request) {
 	//defer db.Close()
 
 	//Check if URI parameter is correct
-	licenceplate, ParamExists := QueryParamExist("licenceplate", r)
+	licenceplate, ParamExists := QueryParamExists("licenceplate", r)
 	if ParamExists {
 		//Update Vehicle
 		var vehicle Vehicle
@@ -123,7 +123,7 @@ func DeleteVehicle(w http.ResponseWriter, r *http.Request) {
 	//defer db.Close()
 
 	//Check the parameter form the URI
-	licenceplate, ParamExists := QueryParamExist("licenceplate", r)
+	licenceplate, ParamExists := QueryParamExists("licenceplate", r)
 	if ParamExists {
 		//Delete Vehicle
 		var vehicle Vehicle
@@ -188,14 +188,14 @@ func DecodeJsonObject(jsonInput io.ReadCloser, vehicle *Vehicle) {
 }
 
 func VehicleExists(vehicle Vehicle) bool {
-	if vehicle.ID != 0 {
+	if vehicle.Licence != "" {
 		return true
 	} else {
 		return false
 	}
 }
 
-func QueryParamExist(parameter string, r *http.Request) (string, bool) {
+func QueryParamExists(parameter string, r *http.Request) (string, bool) {
 	keys, ok := r.URL.Query()[parameter]
 
 	if !ok || len(keys[0]) < 1 {
