@@ -29,14 +29,14 @@ type Vehicle struct {
 
 func InitialMigration() {
 	OpenDatabaseConnection()
-	defer db.Close()
+	//defer db.Close()
 
 	db.AutoMigrate(&Vehicle{})
 }
 
 func GetVehicles(w http.ResponseWriter, r *http.Request) {
-	OpenDatabaseConnection()
-	defer db.Close()
+	//OpenDatabaseConnection()
+	//defer db.Close()
 
 	//Check the parameter form the URI
 	licenceplate, ParamExists := QueryParamExist("licenceplate", r)
@@ -47,13 +47,11 @@ func GetVehicles(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
-
 func GetAllVehicles(w http.ResponseWriter) {
 	var vehicles []Vehicle
 	db.Find(&vehicles)
 	json.NewEncoder(w).Encode(vehicles)
 }
-
 func GetSpecificVehicle(w http.ResponseWriter, licenceplate string) {
 	var vehicle Vehicle
 	db.Where("licence = ?", licenceplate).Find(&vehicle)
@@ -69,8 +67,8 @@ func GetSpecificVehicle(w http.ResponseWriter, licenceplate string) {
 }
 
 func CreateVehicle(w http.ResponseWriter, r *http.Request) {
-	OpenDatabaseConnection()
-	defer db.Close()
+	//OpenDatabaseConnection()
+	//defer db.Close()
 
 	var vehicle Vehicle
 
@@ -86,8 +84,8 @@ func CreateVehicle(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateVehicle(w http.ResponseWriter, r *http.Request) {
-	OpenDatabaseConnection()
-	defer db.Close()
+	//OpenDatabaseConnection()
+	//defer db.Close()
 
 	//Check if URI parameter is correct
 	licenceplate, ParamExists := QueryParamExist("licenceplate", r)
@@ -122,8 +120,8 @@ func UpdateVehicle(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteVehicle(w http.ResponseWriter, r *http.Request) {
-	OpenDatabaseConnection()
-	defer db.Close()
+	//OpenDatabaseConnection()
+	//defer db.Close()
 
 	//Check the parameter form the URI
 	licenceplate, ParamExists := QueryParamExist("licenceplate", r)
