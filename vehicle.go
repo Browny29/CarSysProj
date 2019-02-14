@@ -92,10 +92,7 @@ func CreateVehicle(w http.ResponseWriter, r *http.Request) {
 		Odometer: vehicle.Odometer, Unit: vehicle.Unit, Color: vehicle.Color, Weight: vehicle.Weight})
 
 	//Convert the vehicle back to json and write it in the response
-	vehicleJson, err := json.Marshal(output)
-	if err != nil {
-		panic(err)
-	}
+	vehicleJson := EncodeJsonObject(output)
 
 	//Write the response
 	w.Header().Set("Content-Type", "application/json")
@@ -130,10 +127,7 @@ func UpdateVehicle(w http.ResponseWriter, r *http.Request) {
 			output := db.Save(&newVehicle)
 
 			//Convert the vehicle back to json and write it in the response
-			vehicleJson, err := json.Marshal(output)
-			if err != nil {
-				panic(err)
-			}
+			vehicleJson := EncodeJsonObject(output)
 
 			//Write the response
 			w.Header().Set("Content-Type", "application/json")
@@ -197,6 +191,14 @@ func OpenDatabaseConnection(db *gorm.DB) *gorm.DB {
 
 func CloseDatabaseConnection(db *gorm.DB) {
 	defer db.Close()
+}
+
+func EncodeJsonObject(object interface{}) []byte {
+	jsonObject, err := json.Marshal(object)
+	if err != nil {
+		panic(err)
+	}
+	return jsonObject
 }
 
 func DecodeJsonObject(jsonInput io.ReadCloser, vehicle *Vehicle) {
