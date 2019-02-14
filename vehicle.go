@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/jinzhu/gorm"
@@ -30,24 +31,26 @@ func InitialMigration() {
 	db, err = gorm.Open(databaseType, connectionString)
 	if err != nil {
 		fmt.Println(err.Error())
-		panic("Failed to connect to database")
+		panic("Could not connect to database")
 	}
+
 	defer db.Close()
 
 	db.AutoMigrate(&Vehicle{})
 }
 
 func GetVehicles(w http.ResponseWriter, r *http.Request) {
-	//Establis db connection
 	db, err = gorm.Open(databaseType, connectionString)
 	if err != nil {
+		fmt.Println(err.Error())
 		panic("Could not connect to database")
 	}
+
 	defer db.Close()
 
 	//Check the parameter form the URI
-	licenceplate := DoesQueryParamExist("licenceplate", r)
-	if licenceplate == "" {
+	licenceplate, ParamExists := DoesQueryParamExist("licenceplate", r)
+	if !ParamExists {
 		//GET all vehicles
 		var vehicles []Vehicle
 		db.Find(&vehicles)
@@ -72,20 +75,18 @@ func GetVehicles(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateVehicle(w http.ResponseWriter, r *http.Request) {
-	//Establis db connection
 	db, err = gorm.Open(databaseType, connectionString)
 	if err != nil {
+		fmt.Println(err.Error())
 		panic("Could not connect to database")
 	}
+
 	defer db.Close()
 
 	var vehicle Vehicle
 
-	//Parse json request body
-	err := json.NewDecoder(r.Body).Decode(&vehicle)
-	if err != nil {
-		panic(err)
-	}
+	DecodeJsonObject(r.Body, &vehicle)
+
 	//Create new record in the database
 	output := db.Create(&Vehicle{Licence: vehicle.Licence, Brand: vehicle.Brand, Type: vehicle.Type, Buildyear: vehicle.Buildyear,
 		Odometer: vehicle.Odometer, Unit: vehicle.Unit, Color: vehicle.Color, Weight: vehicle.Weight})
@@ -103,16 +104,16 @@ func CreateVehicle(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateVehicle(w http.ResponseWriter, r *http.Request) {
-	//Establis db connection
 	db, err = gorm.Open(databaseType, connectionString)
 	if err != nil {
+		fmt.Println(err.Error())
 		panic("Could not connect to database")
 	}
-	defer db.Close()
 
+	defer db.Close()
 	//Check if URI parameter is correct
-	licenceplate := DoesQueryParamExist("licenceplate", r)
-	if licenceplate != "" {
+	licenceplate, ParamExists := DoesQueryParamExist("licenceplate", r)
+	if ParamExists {
 		//Update Vehicle
 		var vehicle Vehicle
 		var newVehicle Vehicle
@@ -121,11 +122,7 @@ func UpdateVehicle(w http.ResponseWriter, r *http.Request) {
 
 		//Check if vehicle exists
 		if vehicle.ID != 0 {
-			//Parse json request body
-			err := json.NewDecoder(r.Body).Decode(&newVehicle)
-			if err != nil {
-				panic(err)
-			}
+			DecodeJsonObject(r.Body, &newVehicle)
 
 			//Update values of vehicle
 			newVehicle.ID = vehicle.ID
@@ -149,22 +146,23 @@ func UpdateVehicle(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "Vehicle not found. Nothing had been updated")
 		}
 	} else {
-		//Fault parameter format
+		//Faulty parameter format
 		w.WriteHeader(http.StatusBadRequest)
 	}
 }
 
 func DeleteVehicle(w http.ResponseWriter, r *http.Request) {
-	//Establis db connection
 	db, err = gorm.Open(databaseType, connectionString)
 	if err != nil {
+		fmt.Println(err.Error())
 		panic("Could not connect to database")
 	}
+
 	defer db.Close()
 
 	//Check the parameter form the URI
-	licenceplate := DoesQueryParamExist("licenceplate", r)
-	if licenceplate != "" {
+	licenceplate, ParamExists := DoesQueryParamExist("licenceplate", r)
+	if ParamExists {
 		//Delete Vehicle
 		var vehicle Vehicle
 		db.Where("licence = ?", licenceplate).Find(&vehicle)
@@ -185,15 +183,38 @@ func DeleteVehicle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func DoesQueryParamExist(parameter string, r *http.Request) string {
+func OpenDatabaseConnection(db *gorm.DB) *gorm.DB {
+	db, err = gorm.Open(databaseType, connectionString)
+	if err != nil {
+		fmt.Println(err.Error())
+		panic("Could not connect to database")
+	}
+
+	defer db.Close()
+
+	return db
+}
+
+func CloseDatabaseConnection(db *gorm.DB) {
+	defer db.Close()
+}
+
+func DecodeJsonObject(jsonInput io.ReadCloser, vehicle *Vehicle) {
+	err := json.NewDecoder(jsonInput).Decode(&vehicle)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func DoesQueryParamExist(parameter string, r *http.Request) (string, bool) {
 	keys, ok := r.URL.Query()[parameter]
 
 	if !ok || len(keys[0]) < 1 {
 		//The parameter does not exist
-		return ""
+		return "", false
 	} else {
 		//Return the value of the parameter
 		key := keys[0]
-		return string(key)
+		return string(key), true
 	}
 }
