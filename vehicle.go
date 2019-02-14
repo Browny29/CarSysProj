@@ -41,29 +41,28 @@ func GetVehicles(w http.ResponseWriter, r *http.Request) {
 	//Check the parameter form the URI
 	licenceplate, ParamExists := QueryParamExist("licenceplate", r)
 	if !ParamExists {
-		GetAllVehicles(w)
+		vehicles := EncodeJsonObject(GetAllVehicles(w))
+		WriteSuccessResponse(w, vehicles, "json")
 	} else {
-		GetSpecificVehicle(w, licenceplate)
+		vehicle := GetSpecificVehicle(w, licenceplate)
+		jsonVehicle := EncodeJsonObject(vehicle)
+		if VehicleExists(vehicle) {
+			WriteSuccessResponse(w, jsonVehicle, "json")
+		} else {
+			WriteNotFoundResponse(w)
+		}
 	}
-
 }
-func GetAllVehicles(w http.ResponseWriter) {
+func GetAllVehicles(w http.ResponseWriter) []Vehicle {
 	var vehicles []Vehicle
 	db.Find(&vehicles)
-	json.NewEncoder(w).Encode(vehicles)
+	return vehicles
 }
-func GetSpecificVehicle(w http.ResponseWriter, licenceplate string) {
+func GetSpecificVehicle(w http.ResponseWriter, licenceplate string) Vehicle {
 	var vehicle Vehicle
 	db.Where("licence = ?", licenceplate).Find(&vehicle)
 
-	if VehicleExists(vehicle) {
-		//Show vehicle
-		json.NewEncoder(w).Encode(vehicle)
-	} else {
-		//Give error message back
-		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprintf(w, "Vehicle not found")
-	}
+	return vehicle
 }
 
 func CreateVehicle(w http.ResponseWriter, r *http.Request) {
@@ -154,6 +153,11 @@ func WriteSuccessResponse(w http.ResponseWriter, body []byte, contentType string
 	}
 	w.WriteHeader(http.StatusOK)
 	w.Write(body)
+}
+
+func WriteNotFoundResponse(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusNotFound)
+	fmt.Fprintf(w, "Vehicle not found")
 }
 
 func OpenDatabaseConnection() {
