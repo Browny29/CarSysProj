@@ -60,8 +60,7 @@ func GetVehicles(w http.ResponseWriter, r *http.Request) {
 		var vehicle Vehicle
 		db.Where("licence = ?", licenceplate).Find(&vehicle)
 
-		//Check if vehicle exists
-		if vehicle.ID != 0 {
+		if VehicleExists(vehicle) {
 			//Show vehicle
 			json.NewEncoder(w).Encode(vehicle)
 		} else {
@@ -117,8 +116,7 @@ func UpdateVehicle(w http.ResponseWriter, r *http.Request) {
 
 		db.Where("licence = ?", licenceplate).Find(&vehicle)
 
-		//Check if vehicle exists
-		if vehicle.ID != 0 {
+		if VehicleExists(vehicle) {
 			DecodeJsonObject(r.Body, &newVehicle)
 
 			//Update values of vehicle
@@ -161,8 +159,7 @@ func DeleteVehicle(w http.ResponseWriter, r *http.Request) {
 		var vehicle Vehicle
 		db.Where("licence = ?", licenceplate).Find(&vehicle)
 
-		//Check if vehicle exists
-		if vehicle.ID != 0 {
+		if VehicleExists(vehicle) {
 			//Delete vehicle
 			db.Delete(&vehicle)
 			fmt.Fprintf(w, "Vehicle with licenceplate "+licenceplate+" deleted")
@@ -205,6 +202,14 @@ func DecodeJsonObject(jsonInput io.ReadCloser, vehicle *Vehicle) {
 	err := json.NewDecoder(jsonInput).Decode(&vehicle)
 	if err != nil {
 		panic(err)
+	}
+}
+
+func VehicleExists(vehicle Vehicle) bool {
+	if vehicle.ID != 0 {
+		return true
+	} else {
+		return false
 	}
 }
 
