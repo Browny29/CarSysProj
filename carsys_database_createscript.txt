@@ -10,37 +10,3 @@ CREATE DATABASE carsys
        LC_CTYPE = 'Dutch_Netherlands.1252'
        CONNECTION LIMIT = -1;
 
--- Table: public.vehicles
-
--- DROP TABLE public.vehicles;
-
-CREATE TABLE public.vehicles
-(
-  id integer NOT NULL DEFAULT nextval('vehicles_id_seq'::regclass),
-  created_at timestamp with time zone,
-  updated_at timestamp with time zone,
-  deleted_at timestamp with time zone,
-  licence text,
-  brand text,
-  type text,
-  buildyear integer,
-  odometer integer,
-  unit text,
-  color text,
-  weight integer,
-  CONSTRAINT vehicles_pkey PRIMARY KEY (id)
-)
-WITH (
-  OIDS=FALSE
-);
-ALTER TABLE public.vehicles
-  OWNER TO postgres;
-
--- Index: public.idx_vehicles_deleted_at
-
--- DROP INDEX public.idx_vehicles_deleted_at;
-
-CREATE INDEX idx_vehicles_deleted_at
-  ON public.vehicles
-  USING btree
-  (deleted_at);
