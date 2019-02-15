@@ -33,6 +33,41 @@ func Test_QueryParamExists_Exists(t *testing.T) {
 	expectedString := "1"
 	expectedBool := true
 	actualString, actualBool := QueryParamExists("parameter", &request)
+
+	if actualBool != expectedBool || actualString != expectedString {
+		t.Errorf("Test failed, expected: '%t', '%s', got: '%t', '%s'",
+			expectedBool, expectedString, actualBool, actualString)
+	}
+}
+
+func Test_QueryParamExists_DoesNotExist_EmptyParamValue(t *testing.T){
+	u, err := url.Parse("test.com/test?parameter=")
+	if err != nil {
+		panic(err.Error)
+	}
+	request := http.Request{URL: u}
+
+	expectedString := ""
+	expectedBool := false
+	actualString, actualBool := QueryParamExists("parameter", &request)
+
+	if actualBool != expectedBool || actualString != expectedString {
+		t.Errorf("Test failed, expected: '%t', '%s', got: '%t', '%s'",
+			expectedBool, expectedString, actualBool, actualString)
+	}
+}
+
+func Test_QueryParamExists_DoesNotExist_NoParam(t *testing.T){
+	u, err := url.Parse("test.com/test")
+	if err != nil {
+		panic(err.Error)
+	}
+	request := http.Request{URL: u}
+
+	expectedString := ""
+	expectedBool := false
+	actualString, actualBool := QueryParamExists("parameter", &request)
+
 	if actualBool != expectedBool || actualString != expectedString {
 		t.Errorf("Test failed, expected: '%t', '%s', got: '%t', '%s'",
 			expectedBool, expectedString, actualBool, actualString)
