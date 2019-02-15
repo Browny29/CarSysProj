@@ -10,7 +10,7 @@ type Version struct {
 	Build_date string `json:"Build date"`
 }
 
-func currentVersion(w http.ResponseWriter, r *http.Request) {
+func CurrentVersion(w http.ResponseWriter, r *http.Request) {
 	var version Version
 	resp, err := http.Get("http://nl.carsys.online/version.json")
 	if err != nil {

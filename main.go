@@ -10,7 +10,7 @@ import (
 
 func handleRequests() {
 	myRouter := mux.NewRouter()
-	myRouter.HandleFunc("/carsys/current-version", currentVersion).Methods("GET")
+	myRouter.HandleFunc("/carsys/current-version", CurrentVersion).Methods("GET")
 
 	myRouter.HandleFunc("/vehicle", GetVehicles).Methods("GET")
 	myRouter.HandleFunc("/vehicle", CreateVehicle).Methods("POST")
@@ -20,7 +20,7 @@ func handleRequests() {
 }
 
 func main() {
-	fmt.Println("Go REST API")
+	fmt.Println("Go REST API starting")
 
 	InitialMigration()
 
