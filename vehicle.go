@@ -108,9 +108,7 @@ func UpdateVehicle(w http.ResponseWriter, r *http.Request) {
 			WriteSuccessResponse(w, vehicleJson, "json")
 
 		} else {
-			//Give error message back
-			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprintf(w, "Vehicle not found. Nothing had been updated")
+			WriteNotFoundResponse(w)
 		}
 	} else {
 		//Faulty parameter format
@@ -134,9 +132,7 @@ func DeleteVehicle(w http.ResponseWriter, r *http.Request) {
 			db.Delete(&vehicle)
 			fmt.Fprintf(w, "Vehicle with licenceplate "+licenceplate+" deleted")
 		} else {
-			//Give error message back
-			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprintf(w, "Vehicle not found. Nothing had been deleted")
+			WriteNotFoundResponse(w)
 		}
 	} else {
 		//Fault parameter format
