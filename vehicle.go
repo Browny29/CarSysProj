@@ -168,10 +168,6 @@ func OpenDatabaseConnection() {
 	}
 }
 
-func CloseDatabaseConnection(db *gorm.DB) {
-	defer db.Close()
-}
-
 func EncodeJsonObject(object interface{}) []byte {
 	jsonObject, err := json.Marshal(object)
 	if err != nil {
